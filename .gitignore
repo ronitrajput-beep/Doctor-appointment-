@@ -1,0 +1,14 @@
+.venv/
+node_modules/
+dist/
+__pycache__/
+.pytest_cache/
+.env
+database/*
+!database/.gitkeep
+DEMO_ACCOUNTS.md
+*.zip
+test-results/
+playwright-report/
+*.log
+*.tsbuildinfo
