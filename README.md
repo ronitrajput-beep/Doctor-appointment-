@@ -2,7 +2,11 @@
 
 Working React + FastAPI application for **Ronit Rajput · E052 · CSBS · Division E · Batch 2**.
 
-Patient booking, doctor schedules, administrator management, SQLite persistence, and validated seven-sheet Excel exchange. White-and-gold responsive design with fictional clinician portraits.
+Patient booking, doctor schedules, administrator management, SQLite persistence, and validated seven-sheet Excel exchange. White-and-gold design with a comedy crossover cast: **Dr. Jhatka (Motu Patlu), Jagdish Asthana (Munna Bhai M.B.B.S.), Emmett Brown (Back to the Future), Tsunade (Naruto), Tony Tony Chopper (One Piece), and John Zoidberg (Futurama)**.
+
+The six original demo doctors have been replaced with character portraits, playful qualifications and funny biographies. This is an unofficial fictional crossover; specialties, years of experience and fees are demo values rather than claims about the characters. Booking, authentication and Excel exchange work normally.
+
+Existing development databases upgrade the six original demo profiles automatically on startup. IDs, appointment history, payments, accounts and passwords are preserved. Admin-created or renamed doctors are not overwritten, and later edits to the new character profiles survive restarts. Demo upgrades are disabled in production and when `SEED_DEMO=0`.
 
 ## Start on your MacBook
 
@@ -21,6 +25,10 @@ Patient booking, doctor schedules, administrator management, SQLite persistence,
 The launcher installs dependencies, builds the website, creates fictional sample data once, and serves the frontend and backend together. It preserves existing bookings and accounts on later starts. Internet is needed for initial installation; the running app and locally bundled fonts/images require no paid service.
 
 `Start-Mac.command` is an alternative launcher. If macOS blocks double-clicking a downloaded script or its executable permission was lost during extraction, use the Terminal command above; do not disable macOS security settings.
+
+## Updating an existing Mac installation
+
+Stop the old app with Control+C and keep a backup of its project folder. Extract the updated download into a separate folder. Copy your **entire `database` folder** and **`DEMO_ACCOUNTS.md`** from the old project into the new folder, replacing its empty database folder, then run `bash start.sh` from the new folder. Do not copy an actively running SQLite database. This keeps your accounts/bookings and automatically upgrades the six original doctor profiles. A fresh installation instead generates fresh local accounts.
 
 ## What works
 

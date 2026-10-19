@@ -1,23 +1,20 @@
-# Rebuild verification — 17 October 2026
+# Verification — 19 October 2026
 
-Actual checks executed in the Linux cloud environment with Python 3.12.14, Node 24.19.0 and system Chromium.
+The comedy clinic update was tested in the Linux cloud environment with Python 3.12.14, Node 24.19.0 and system Chromium.
 
 | Check | Result |
 |---|---|
-| API/business/database suite | **18 passed, 0 failed, 0 skipped** in 12.32 seconds. `docs/test-results.xml`. |
-| Browser workflows | **4 passed, 0 failed, 0 skipped**; final run 7.0 seconds. `docs/browser-test-results.json`. |
-| TypeScript and production Vite build | Passed. Local fonts, images and compiled React served by FastAPI. |
-| Exact `start.sh` launcher | Passed dependency installation, frozen npm install, build, initialization, server start and HTTP health/SPAs on alternate port 8001. |
-| Shell syntax | `bash -n` for the Mac wrapper, launcher and cloud setup script passed. |
-| Data initialization | Seed and slot refresh repeatability tested; existing bookings survive database initialization and a new authenticated client. |
-| Concurrent booking | Eight requests for one slot: exactly one 201 response and seven 409 conflicts. |
+| API/business/database suite | **20 passed, 0 failed, 0 skipped**, 14.11 seconds. `docs/test-results.xml`. |
+| Browser workflows | **4 passed, 0 failed, 0 skipped**, 8.5 seconds. `docs/browser-test-results.json`. |
+| TypeScript and production Vite build | Passed with all six bundled character portraits. |
+| Existing database upgrade | All original demo profiles updated; existing bookings, slots, payments, patient records, notifications, sessions and credential fields matched before/after. |
+| Cast migration regression tests | Original identities upgrade once; later profile edits and custom names survive; production/disabled demo mode is respected. |
+| Visual review | Doctor listing, homepage and desktop screenshots inspected; automated mobile navigation and overflow checks passed. |
 
-API tests cover auth/duplicate registration/hash/cookie/logout, role and origin restrictions, booking persistence, unavailable/past slots, failed payments, cancellation/refund/rebooking, atomic reschedule conflicts, ownership/two-hour cutoff, doctor schedule overlap/remove/reactivate/completion, concurrent booking, Excel round-trip and booking synchronization, dry-run updates, new inactive accounts, invalid FK/duplicate/formula/role/overlap/payment rollback, upload limits, formula-safe export, admin management/session revocation, profiles, notifications, filtering and seed repeatability.
+Browser checks verify each of the six character names and successful loading of its image, plus search/profile, simulated failed-payment retry, successful booking, confirmation, rescheduling, cancellation after refresh, mobile logout, doctor slot publication/removal/profile, and administrator Excel download/preview/import, reports and account search. Booking tests select future dates far enough ahead to exercise the two-hour change policy reliably on an existing installation.
 
-Browser tests cover desktop home/search/profile; mobile navigation and overflow; patient payment failure/retry, confirmation, reschedule, cancellation after refresh and mobile logout; doctor slot publication/removal/profile; administrator workbook download/validation/preview/import, reports and account search. Screenshots are in `screenshots/`.
+The API suite additionally covers password hashing, cookies and logout, roles and ownership, past/unavailable slots, refunds, rescheduling atomicity, doctor schedule overlap/completion, eight concurrent requests for one slot (one winner), workbook integrity and safe formulas, inactive imported accounts, administrative controls, notifications, filtering and seed repeatability.
 
-The first browser run detected mobile dashboard overflow and existing-user workbook import failure. Both were fixed and all four workflows passed afterward. The final screenshots use reduced motion to avoid capturing an animation halfway through.
+Updated screenshots are in `screenshots/`. The generated image assets are illustrated character fan art, documented in `docs/ASSETS.md`. The old realistic clinician contact sheet is removed.
 
-One upstream Starlette/AnyIO deprecation warning was reported by pytest. The first sandboxed pytest attempt stalled before test completion; it was terminated and the complete suite was rerun successfully with the environment's supported execution permission. No test assertions were removed or skipped.
-
-Mac-specific and Windows-specific OS behavior were not executed on this Linux host. The shared Bash launcher was exercised. No live external payment, email or SMS integration, production deployment, sustained 200-user workload, uptime SLA, complete accessibility audit, or restoration into a fresh cloud task is claimed. Source publication/download verification is recorded separately at delivery time.
+The shared Bash launcher and cloud setup script were exercised during the 17 October rebuild and are unchanged by this update. Native Mac and Windows execution, a sustained 200-user workload, production uptime, real payments/email/SMS and a complete accessibility audit are not claimed. Pytest reports one upstream Starlette/AnyIO deprecation warning.

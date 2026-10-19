@@ -44,3 +44,7 @@ The user's explicit SQLite + Excel choice takes precedence over earlier MySQL su
 | Performance/availability targets | Under-3-second responses, 200 users and 99% availability remain engineering targets | Bounded local checks only; sustained production performance/uptime unverified |
 
 Optional scope excluded: receptionist role, prescriptions, diagnostics, lab technicians, lab orders, live email/SMS and real payments. The completed project focuses on the finalized appointment workflow and user's explicit master prompt.
+
+## Character roster update — 19 October 2026
+
+At the user's request, the six realistic fictional doctor identities were replaced by doctors/scientists from cartoons, movies and anime, including Dr. Jhatka. The interface uses comedy copy and character portraits; displayed qualifications and experience are playful demo details. The appointment entities, workflows, access controls and Excel schemas are unchanged. An idempotent startup upgrade changes only the original seeded profiles and preserves existing bookings, payments, account credentials and later administrator edits. This deliberate presentation change supersedes the original preference for realistic clinician portraits.

@@ -77,8 +77,9 @@ export function Footer() {
         <div>
           <Logo />
           <p>
-            Thoughtful care. Meaningful connections.
-            <br />A healthier tomorrow, together.
+            Familiar faces. Unfamiliar bedside manners.
+            <br />
+            Your next appointment has main-character energy.
           </p>
         </div>
         <div>
@@ -105,7 +106,8 @@ export function Footer() {
           © {new Date().getFullYear()} Aurelia Care · Ronit Rajput, E052
         </span>
         <span>
-          Academic demonstration · Fictional clinicians · Simulated payments
+          Fictional crossover clinic · Fan-made character art · Simulated
+          payments
         </span>
       </div>
     </footer>
@@ -114,21 +116,27 @@ export function Footer() {
 export function Portrait({
   index = 0,
   hero = false,
+  name = "Fictional crossover doctor",
 }: {
   index?: number;
   hero?: boolean;
+  name?: string;
 }) {
+  const portraits = [
+    "jhatka",
+    "asthana",
+    "brown",
+    "tsunade",
+    "chopper",
+    "zoidberg",
+  ];
   return (
     <div className={"portrait " + (hero ? "portrait-hero" : "")}>
       <img
-        src="/images/medical-team.png"
-        alt="Fictional clinician — generated sample portrait"
-        style={{
-          left: `-${(index % 3) * 100}%`,
-          top: `-${Math.floor(index / 3) * 100}%`,
-        }}
+        src={`/images/doctors/${portraits[index] || portraits[0]}.png`}
+        alt={`${name} — illustrated character portrait`}
       />
-      <span className="sample-label">Sample portrait</span>
+      <span className="sample-label">Character fan art</span>
     </div>
   );
 }
@@ -136,7 +144,7 @@ export function DoctorCard({ doctor: d }: { doctor: Doctor }) {
   return (
     <article className="doctor-card">
       <Link to={"/doctors/" + d.doctor_id} tabIndex={-1}>
-        <Portrait index={d.image} />
+        <Portrait index={d.image} name={`Dr. ${d.full_name}`} />
       </Link>
       <div className="doctor-card-body">
         <div className="eyebrow">{d.specialization}</div>
@@ -145,7 +153,7 @@ export function DoctorCard({ doctor: d }: { doctor: Doctor }) {
         </h3>
         <p>
           {d.qualification} <span className="dot">·</span> {d.experience_years}{" "}
-          years experience
+          fictional years experience
         </p>
         <div className="availability-text">
           <span

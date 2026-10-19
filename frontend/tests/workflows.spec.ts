@@ -41,7 +41,7 @@ test("landing, search, doctor profiles and mobile navigation", async ({
   await page
     .locator(".hero-search")
     .getByPlaceholder("Who are you looking for?")
-    .fill("Arjun");
+    .fill("Jhatka");
   await page
     .locator(".hero-search")
     .getByRole("button", { name: "Find a doctor" })
@@ -49,10 +49,33 @@ test("landing, search, doctor profiles and mobile navigation", async ({
   await expect(page.locator(".doctor-card")).toHaveCount(1);
   await page.getByRole("button", { name: "Clear filters" }).click();
   await expect(page.locator(".doctor-card")).toHaveCount(6);
+  for (const name of [
+    "Jhatka",
+    "Jagdish Asthana",
+    "Emmett Brown",
+    "Tsunade",
+    "Tony Tony Chopper",
+    "John Zoidberg",
+  ]) {
+    const card = page.locator(".doctor-card").filter({
+      has: page.getByRole("link", { name: `Dr. ${name}`, exact: true }),
+    });
+    await expect(card).toBeVisible();
+    const portrait = card.getByRole("img", {
+      name: `Dr. ${name} — illustrated character portrait`,
+    });
+    await expect(portrait).toHaveAttribute(
+      "src",
+      /\/images\/doctors\/[a-z]+\.png$/,
+    );
+    expect(
+      await portrait.evaluate(
+        (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
+      ),
+    ).toBeTruthy();
+  }
   await screenshot(page, "find-doctors");
-  await page
-    .getByRole("link", { name: "Dr. Arjun Mehta", exact: true })
-    .click();
+  await page.getByRole("link", { name: "Dr. Jhatka", exact: true }).click();
   await expect(page.locator(".slot").first()).toBeVisible();
   await screenshot(page, "doctor-profile");
   await page.setViewportSize({ width: 390, height: 844 });
@@ -76,6 +99,11 @@ test("patient payment retry, confirmation, reschedule, cancel and mobile logout"
   await login(page, "patient@example.com");
   await screenshot(page, "patient-dashboard");
   await page.goto("/doctors/doctor-1");
+  const appointmentDate = page.getByLabel("Appointment date");
+  await expect(appointmentDate.locator("option").last()).toBeAttached();
+  await appointmentDate.selectOption(
+    (await appointmentDate.locator("option").last().getAttribute("value"))!,
+  );
   await page.locator(".slot").first().click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await screenshot(page, "booking-review");
@@ -101,6 +129,10 @@ test("patient payment retry, confirmation, reschedule, cancel and mobile logout"
   await expect(
     page.getByLabel("Available times").locator("option").first(),
   ).toBeAttached();
+  const replacement = page.getByLabel("Available times");
+  await replacement.selectOption(
+    (await replacement.locator("option").last().getAttribute("value"))!,
+  );
   await page.getByRole("button", { name: "Confirm reschedule" }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await card.getByRole("button", { name: "Cancel appointment" }).click();
@@ -140,7 +172,7 @@ test("doctor availability publication and removal", async ({ page }) => {
     .getByRole("navigation", { name: "Dashboard" })
     .getByRole("link", { name: "My profile" })
     .click();
-  await expect(page.getByLabel("Full name")).toHaveValue("Arjun Mehta");
+  await expect(page.getByLabel("Full name")).toHaveValue("Jhatka");
   await page.getByRole("button", { name: "Save doctor" }).click();
   await expect(page.getByRole("status")).toContainText("updated");
 });
@@ -159,14 +191,12 @@ test("administrator workbook validation, import, reports and account management"
   const download = await downloadPromise;
   const downloaded = await download.path();
   expect(download.suggestedFilename()).toBe("Doctor_Appointment_Database.xlsx");
-  await page
-    .getByLabel("Choose workbook")
-    .setInputFiles({
-      name: download.suggestedFilename(),
-      mimeType:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      buffer: fs.readFileSync(downloaded!),
-    });
+  await page.getByLabel("Choose workbook").setInputFiles({
+    name: download.suggestedFilename(),
+    mimeType:
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    buffer: fs.readFileSync(downloaded!),
+  });
   await page.getByRole("button", { name: "Validate & preview" }).click();
   await expect(page.getByRole("status")).toContainText(
     "All records passed validation",

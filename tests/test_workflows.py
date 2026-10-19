@@ -471,7 +471,10 @@ def test_profile_notifications_search(env):
     assert [d["consultation_fee"] for d in doctors] == sorted(
         d["consultation_fee"] for d in doctors
     )
-    assert len(p.get("/api/doctors?specialization=Cardiology&q=Arjun").json()) == 1
+    assert (
+        len(p.get("/api/doctors?specialization=General%20Medicine&q=Jhatka").json())
+        == 1
+    )
     assert p.get("/api/health").json()["database"] == 1
 
 
@@ -487,3 +490,107 @@ def test_seed_is_repeatable(env):
     demo_slots()
     after = {t: db.one(f"SELECT count(*) AS n FROM {t}")["n"] for t in before}
     assert before == after
+
+
+def test_legacy_cast_upgrade_preserves_bookings_accounts_and_later_edits(env):
+    from app.seed import seed, CAST, LEGACY_NAMES, SPECIALTIES
+
+    _, login = env
+    patient = login()
+    booked = book(patient, slots(patient)[0]["slot_id"]).json()
+    with db.transaction() as c:
+        for i, name in enumerate(LEGACY_NAMES, 1):
+            c.execute(
+                "UPDATE users SET full_name=? WHERE user_id=?",
+                (name, f"user-doctor-{i}"),
+            )
+            c.execute(
+                "UPDATE doctors SET qualification='MBBS, MD',biography='Original demo biography' WHERE doctor_id=?",
+                (f"doctor-{i}",),
+            )
+    protected = [
+        "appointments",
+        "payments",
+        "patients",
+        "availability",
+        "notifications",
+        "sessions",
+    ]
+    before = {
+        table: db.rows(f"SELECT * FROM {table} ORDER BY rowid") for table in protected
+    }
+    credentials = db.rows(
+        "SELECT user_id,email,password_hash,active FROM users ORDER BY user_id"
+    )
+    seed()
+    for i, (character, specialty) in enumerate(zip(CAST, SPECIALTIES), 1):
+        record = db.one(
+            "SELECT d.*,u.full_name FROM doctors d JOIN users u USING(user_id) WHERE doctor_id=?",
+            (f"doctor-{i}",),
+        )
+        assert record["full_name"] == character["name"]
+        assert record["biography"] == character["biography"]
+        assert record["qualification"] == character["qualification"]
+        assert record["specialization"] == specialty
+        assert record["image"] == i - 1
+    assert before == {
+        table: db.rows(f"SELECT * FROM {table} ORDER BY rowid") for table in protected
+    }
+    assert credentials == db.rows(
+        "SELECT user_id,email,password_hash,active FROM users ORDER BY user_id"
+    )
+    assert (
+        patient.get("/api/appointments/" + booked["appointment_id"]).json()[
+            "doctor_name"
+        ]
+        == "Jhatka"
+    )
+    assert login("doctor").get("/api/auth/me").json()["full_name"] == "Jhatka"
+    with db.transaction() as c:
+        c.execute(
+            "UPDATE doctors SET biography='An administrator wrote this bio.',consultation_fee=777 WHERE doctor_id='doctor-1'"
+        )
+    seed()
+    record = db.one(
+        "SELECT biography,consultation_fee FROM doctors WHERE doctor_id='doctor-1'"
+    )
+    assert record == {
+        "biography": "An administrator wrote this bio.",
+        "consultation_fee": 777,
+    }
+
+
+def test_cast_upgrade_skips_customized_users_and_disabled_demo_mode(env, monkeypatch):
+    from app import seed as seeder
+
+    with db.transaction() as c:
+        c.execute(
+            "UPDATE users SET full_name='My own doctor' WHERE user_id='user-doctor-1'"
+        )
+        c.execute(
+            "UPDATE users SET full_name=? WHERE user_id='user-doctor-2'",
+            (seeder.LEGACY_NAMES[1],),
+        )
+    monkeypatch.setenv("SEED_DEMO", "0")
+    seeder.seed()
+    assert (
+        db.one("SELECT full_name FROM users WHERE user_id='user-doctor-2'")["full_name"]
+        == seeder.LEGACY_NAMES[1]
+    )
+    monkeypatch.setenv("SEED_DEMO", "1")
+    monkeypatch.setattr(seeder, "PRODUCTION", True)
+    seeder.seed()
+    assert (
+        db.one("SELECT full_name FROM users WHERE user_id='user-doctor-2'")["full_name"]
+        == seeder.LEGACY_NAMES[1]
+    )
+    monkeypatch.setattr(seeder, "PRODUCTION", False)
+    seeder.seed()
+    assert (
+        db.one("SELECT full_name FROM users WHERE user_id='user-doctor-1'")["full_name"]
+        == "My own doctor"
+    )
+    assert (
+        db.one("SELECT full_name FROM users WHERE user_id='user-doctor-2'")["full_name"]
+        == "Jagdish Asthana"
+    )
