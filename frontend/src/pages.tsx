@@ -116,21 +116,20 @@ export function Home() {
             transition={{ duration: 0.6 }}
           >
             <div className="eyebrow pill">
-              <span className="status-dot" /> THE CROSSOVER CLINIC IS OPEN
+              <span className="status-dot" /> CARE THAT PUTS YOU FIRST
             </div>
             <h1>
               Your health.
               <br />
-              Their <em>plot</em>
+              Our <em>highest</em>
               <br />
-              twist.
+              priority.
             </h1>
             <p>
-              From Furfuri Nagar to the multiverse,
-              <br className="desktop-only" /> the most chaotic doctors are
-              taking appointments.
-              <br className="desktop-only" /> Pick your character. Bring your
-              sense of humor.
+              Exceptional care begins with a connection.
+              <br className="desktop-only" /> Find the right specialist, at the
+              right time —<br className="desktop-only" /> and feel cared for,
+              every step of the way.
             </p>
             <div className="button-row">
               <Link to="/doctors" className="button dark">
@@ -145,23 +144,21 @@ export function Home() {
                 <ShieldCheck size={24} />
               </span>
               <div>
-                <strong>Fictional doctors. Fully working bookings.</strong>
-                <small>
-                  Real scheduling · Pretend payments · Maximum drama
-                </small>
+                <strong>Personal care. Peace of mind.</strong>
+                <small>Secure booking · Clear consultation fees</small>
               </div>
             </div>
           </motion.div>
           <div className="hero-art">
             <div className="hero-orbit" />
-            <Portrait hero index={0} name="Dr. Jhatka from Motu Patlu" />
+            <Portrait hero index={0} name="Dr. Jhatka" />
             <div className="floating-card top">
               <span className="gold-icon">
                 <HeartPulse />
               </span>
               <div>
-                <strong>Dr. Jhatka is in.</strong>
-                <small>The samosas are under observation.</small>
+                <strong>Good health starts here.</strong>
+                <small>Expertise with a human touch</small>
               </div>
             </div>
             <div className="floating-card bottom">
@@ -169,14 +166,12 @@ export function Home() {
                 <Check />
               </span>
               <div>
-                <strong>Appointment-O-Matic: online</strong>
-                <small>Zero explosions. So far.</small>
+                <strong>Your next step to better health</strong>
+                <small>Choose a specialist. Book with ease.</small>
               </div>
               <ArrowUpRight size={20} />
             </div>
-            <span className="hero-art-label">
-              BIG CHARACTERS. SMALL WAITING ROOM.
-            </span>
+            <span className="hero-art-label">THOUGHTFUL CARE, ALWAYS.</span>
           </div>
         </div>
         <div className="container">
@@ -194,7 +189,7 @@ export function Home() {
           <Stethoscope /> Care across specialties
         </span>
         <span>
-          <HeartPulse /> Humans, pirates & one lobster
+          <HeartPulse /> People before everything
         </span>
       </div>
       <section className="section container">
@@ -220,19 +215,16 @@ export function Home() {
       <section className="section tinted">
         <div className="container">
           <SectionTitle
-            eyebrow="MEET THE ABSOLUTE CHARACTERS"
-            title="Questionable methods. Iconic doctors."
-            description="Cartoons, movies and anime. Somehow, they all share a waiting room."
+            eyebrow="MEET YOUR SPECIALISTS"
+            title="Expert hands. Caring hearts."
+            description="Discover the people dedicated to your wellbeing."
             link="/doctors"
           />
           <ErrorBox message={error} />
           <div className="doctor-grid">
-            {[...doctors]
-              .sort((a, b) => a.image - b.image)
-              .slice(0, 3)
-              .map((d) => (
-                <DoctorCard key={d.doctor_id} doctor={d} />
-              ))}
+            {doctors.slice(0, 3).map((d) => (
+              <DoctorCard key={d.doctor_id} doctor={d} />
+            ))}
           </div>
         </div>
       </section>
@@ -247,12 +239,12 @@ export function Home() {
             [
               "01",
               "Find your specialist",
-              "Choose your specialist. Try not to judge the lab coat.",
+              "Explore doctors by expertise, experience and availability.",
             ],
             [
               "02",
               "Choose your moment",
-              "Pick a time. Even time-traveling scientists need a calendar.",
+              "Pick a date and time that fits comfortably into your day.",
             ],
             [
               "03",
@@ -262,7 +254,7 @@ export function Home() {
             [
               "04",
               "You’re all set",
-              "Your booking stays in your dashboard. No treasure map needed.",
+              "Your confirmation and updates stay together in your dashboard.",
             ],
           ].map(([n, t, p]) => (
             <div key={n}>
@@ -275,13 +267,11 @@ export function Home() {
       </section>
       <section className="container">
         <div className="care-banner">
-          <div className="eyebrow">
-            YOUR NEXT APPOINTMENT NEEDS A PLOT TWIST
-          </div>
+          <div className="eyebrow">A LITTLE CARE GOES A LONG WAY</div>
           <h2>
-            Pick a doctor. <em>Any universe.</em>
+            Make time for <em>yourself.</em>
             <br />
-            Yes, even Zoidberg.
+            We’ll take care of the rest.
           </h2>
           <Link to="/doctors" className="button dark">
             Book an appointment <ArrowUpRight size={18} />
@@ -332,7 +322,7 @@ export function FindDoctors() {
       <div className="page-heading">
         <div className="eyebrow">YOUR PARTNER IN BETTER HEALTH</div>
         <h1>
-          Pick your doctor. <em>Pick your chaos.</em>
+          Find your <em>kind of care.</em>
         </h1>
         <p>
           Thoughtful specialists, transparent fees, and a time that works for
@@ -476,7 +466,7 @@ export function DoctorProfile() {
                 <div className="profile-facts">
                   <span>
                     <Stethoscope />
-                    {d.experience_years} fictional years of experience
+                    {d.experience_years} years of experience
                   </span>
                   <span>
                     <HeartPulse />
@@ -484,13 +474,10 @@ export function DoctorProfile() {
                   </span>
                 </div>
                 <p>
-                  Big character energy. Surprisingly organized calendar.
-                  <br />
-                  Your next appointment just got a lot less boring.
+                  Care that listens. Guidance you can understand.
+                  <br />A consultation focused on you.
                 </p>
-                <span className="badge">
-                  Fictional character · Comedy clinic
-                </span>
+                <span className="badge">Fictional demonstration clinician</span>
               </div>
             </div>
             <div className="profile-columns">
@@ -748,10 +735,8 @@ export function AuthPage({ registerMode = false }: { registerMode?: boolean }) {
           <br />
           All in one thoughtful space.
         </p>
-        <Portrait index={3} />
-        <div className="auth-quote">
-          “The waiting room has entered its crossover arc.”
-        </div>
+        <Portrait index={3} name="Dr. Tsunade" />
+        <div className="auth-quote">“Care begins with listening.”</div>
       </div>
       <section className="auth-form panel">
         <div className="eyebrow">
@@ -857,16 +842,17 @@ export function About() {
   return (
     <div className="container section">
       <div className="profile-hero">
-        <Portrait index={5} name="Dr. Zoidberg from Futurama" />
+        <Portrait index={5} name="Dr. John Zoidberg" />
         <div>
           <div className="eyebrow">THE HEART OF AURELIA</div>
           <h1>
-            Six doctors.
+            Healthcare.
             <br />
-            <em>Several universes.</em>
+            <em>With a human touch.</em>
           </h1>
           <p className="lead">
-            One waiting room. Absolutely no chance of a normal staff meeting.
+            We believe finding care should feel reassuring, simple, and
+            personal.
           </p>
           <p>
             Aurelia connects patients with specialists through clear profiles,
@@ -887,13 +873,9 @@ export function About() {
           Experiments 1–8.
         </p>
         <p>
-          The cast comes from Motu Patlu, Munna Bhai M.B.B.S., Back to the
-          Future, Naruto, One Piece and Futurama. Portraits are generated fan
-          art; this crossover is unofficial. Qualifications, specialties, fees
-          and experience are playful demo details, not real medical credentials
-          or canonical claims. Payments are simulated. Appointment updates and
-          reminders appear inside your account; external email and SMS services
-          are not connected.
+          All clinician profiles and patient records are fictional. Payments are
+          simulated. Appointment updates and reminders appear inside your
+          account; external email and SMS services are not connected.
         </p>
       </section>
     </div>

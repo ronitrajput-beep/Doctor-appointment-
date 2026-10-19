@@ -77,9 +77,8 @@ export function Footer() {
         <div>
           <Logo />
           <p>
-            Familiar faces. Unfamiliar bedside manners.
-            <br />
-            Your next appointment has main-character energy.
+            Thoughtful care. Meaningful connections.
+            <br />A healthier tomorrow, together.
           </p>
         </div>
         <div>
@@ -106,8 +105,7 @@ export function Footer() {
           © {new Date().getFullYear()} Aurelia Care · Ronit Rajput, E052
         </span>
         <span>
-          Fictional crossover clinic · Fan-made character art · Simulated
-          payments
+          Academic demonstration · Fictional clinicians · Simulated payments
         </span>
       </div>
     </footer>
@@ -116,7 +114,7 @@ export function Footer() {
 export function Portrait({
   index = 0,
   hero = false,
-  name = "Fictional crossover doctor",
+  name = "Fictional doctor",
 }: {
   index?: number;
   hero?: boolean;
@@ -153,7 +151,7 @@ export function DoctorCard({ doctor: d }: { doctor: Doctor }) {
         </h3>
         <p>
           {d.qualification} <span className="dot">·</span> {d.experience_years}{" "}
-          fictional years experience
+          years experience
         </p>
         <div className="availability-text">
           <span

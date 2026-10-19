@@ -393,7 +393,7 @@ summary:focus-visible {
   position: relative;
   overflow: hidden;
   background: #ece8df;
-  aspect-ratio: 1;
+  aspect-ratio: 1.38;
 }
 .portrait img {
   position: absolute;
@@ -1996,7 +1996,7 @@ summary {
     max-width: 100%;
   }
   .doctor-card .portrait {
-    aspect-ratio: 1;
+    aspect-ratio: 1.35;
   }
   .doctor-card-body {
     padding: 23px;

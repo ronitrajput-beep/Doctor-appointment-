@@ -2,9 +2,9 @@
 
 Working React + FastAPI application for **Ronit Rajput · E052 · CSBS · Division E · Batch 2**.
 
-Patient booking, doctor schedules, administrator management, SQLite persistence, and validated seven-sheet Excel exchange. White-and-gold design with a comedy crossover cast: **Dr. Jhatka (Motu Patlu), Jagdish Asthana (Munna Bhai M.B.B.S.), Emmett Brown (Back to the Future), Tsunade (Naruto), Tony Tony Chopper (One Piece), and John Zoidberg (Futurama)**.
+Patient booking, doctor schedules, administrator management, SQLite persistence, and validated seven-sheet Excel exchange. White-and-gold design with character names and portraits: **Dr. Jhatka (Motu Patlu), Jagdish Asthana (Munna Bhai M.B.B.S.), Emmett Brown (Back to the Future), Tsunade (Naruto), Tony Tony Chopper (One Piece), and John Zoidberg (Futurama)**.
 
-The six original demo doctors have been replaced with character portraits, playful qualifications and funny biographies. This is an unofficial fictional crossover; specialties, years of experience and fees are demo values rather than claims about the characters. Booking, authentication and Excel exchange work normally.
+The six original demo doctors have been replaced with character names and portraits. Normal clinic wording, qualifications and biographies are retained. This is an unofficial fictional crossover; specialties, years of experience and fees are demo values rather than claims about the characters. Booking, authentication and Excel exchange work normally.
 
 Existing development databases upgrade the six original demo profiles automatically on startup. IDs, appointment history, payments, accounts and passwords are preserved. Admin-created or renamed doctors are not overwritten, and later edits to the new character profiles survive restarts. Demo upgrades are disabled in production and when `SEED_DEMO=0`.
 

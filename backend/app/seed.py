@@ -1,16 +1,17 @@
 import os
+from hashlib import sha256
 import secrets
 from datetime import timedelta
 from . import database as db
 from .security import hash_password, PRODUCTION
 
 SPECIALTIES = [
-    "General Medicine",
+    "Cardiology",
     "Dermatology",
     "Neurology",
-    "Cardiology",
     "Pediatrics",
     "Orthopedics",
+    "General Medicine",
 ]
 LEGACY_NAMES = [
     "Arjun Mehta",
@@ -23,43 +24,78 @@ LEGACY_NAMES = [
 CAST = [
     {
         "name": "Jhatka",
-        "qualification": "Motu Patlu · PhD in accidental inventions",
-        "biography": "Furfuri Nagar's most enthusiastic inventor has opened a clinic. Dr. Jhatka promises a consultation without explosions, although the waiting-room toaster has other plans. His latest invention is the Appointment-O-Matic: it works almost as well as this website. Please keep Motu away from the complimentary samosas.",
+        "qualification": "MBBS, MD",
+        "biography": "Dr. Jhatka brings a thoughtful, patient-first approach to cardiology. With careful listening and clear guidance, every consultation focuses on helping you feel informed and supported.",
     },
     {
         "name": "Jagdish Asthana",
-        "qualification": "Munna Bhai M.B.B.S. · Dean of extremely serious laughter",
-        "biography": "Dr. Asthana runs a very serious clinic. You can tell because he laughs aggressively whenever things go wrong. His skincare routine is strict discipline, a spotless white coat and absolutely no surprise jaadu ki jhappis from Munna. Please arrive on time: the dean has already checked the attendance register twice.",
+        "qualification": "MBBS, MD",
+        "biography": "Dr. Jagdish Asthana brings a thoughtful, patient-first approach to dermatology. With careful listening and clear guidance, every consultation focuses on helping you feel informed and supported.",
     },
     {
         "name": "Emmett Brown",
-        "qualification": "Back to the Future · PhD in flux capacitor repairs",
-        "biography": "Great Scott! Doc Brown has converted his lab into a fictional clinic, and the waiting-room clock is now deeply confused. He specializes in overthinking, spectacular bed hair and appointments that require 1.21 gigawatts of enthusiasm. Please use the calendar: the booking system still refuses appointments in 1985, even if your DeLorean does not.",
+        "qualification": "MBBS, MD",
+        "biography": "Dr. Emmett Brown brings a thoughtful, patient-first approach to neurology. With careful listening and clear guidance, every consultation focuses on helping you feel informed and supported.",
     },
     {
         "name": "Tsunade",
-        "qualification": "Naruto · Legendary medical ninja & Fifth Hokage",
-        "biography": "Konoha's legendary medical ninja is taking a break from Hokage paperwork to run this fictional clinic. Expect a no-nonsense consultation, legendary healing energy and zero patience for patients who say they Googled it. Please do not challenge her to an arm-wrestling match while you wait.",
+        "qualification": "MBBS, MD",
+        "biography": "Dr. Tsunade brings a thoughtful, patient-first approach to pediatrics. With careful listening and clear guidance, every consultation focuses on helping you feel informed and supported.",
     },
     {
         "name": "Tony Tony Chopper",
-        "qualification": "One Piece · Straw Hat doctor, definitely not a pet",
-        "biography": "The Straw Hat Pirates' doctor accepts patients of all ages, species and bounty levels. Tell Chopper he is a great doctor and he will insist that compliments do not make him happy while visibly dancing. Cotton candy is his favorite thank-you gift. The pirate ship may move; your booking stays right here.",
+        "qualification": "MBBS, MD",
+        "biography": "Dr. Tony Tony Chopper brings a thoughtful, patient-first approach to orthopedics. With careful listening and clear guidance, every consultation focuses on helping you feel informed and supported.",
     },
     {
         "name": "John Zoidberg",
-        "qualification": "Futurama · Decapodian doctor with excellent claws",
-        "biography": "Why not Zoidberg? Planet Express's resident doctor is delighted that someone voluntarily booked an appointment. His bedside manner is enthusiastic, his claws are enormous, and his understanding of humans is a work in progress. Please specify your species before he asks whether your shell is molting.",
+        "qualification": "MBBS, MD",
+        "biography": "Dr. John Zoidberg brings a thoughtful, patient-first approach to general medicine. With careful listening and clear guidance, every consultation focuses on helping you feel informed and supported.",
     },
+]
+
+# Exact fingerprints of the previous generated defaults; preserve custom edits.
+_PREVIOUS_DEFAULTS = [
+    {
+        "qualification": "1a1ee07d6597cde698b89200dcc4830a476a01ad342d35cdbac75dd431e041ed",
+        "biography": "da6ce0e7489ee22786edd3debc2b40c9907c9bf515042f622513df0511e58af0",
+    },
+    {
+        "qualification": "c0235892736ee047436d4c28398a39af71535a0147187bfe15f33aae11629047",
+        "biography": "eb54f48484045515ebf27fdeb3ed9f23bff17a00b15f068df4517f38cd7e1e76",
+    },
+    {
+        "qualification": "891157c70dee5d2e4e83b0b722b15b401a9fdd3ecafbf54655eb0ae5017879c0",
+        "biography": "dbf94c1f45ed920eb68f5bcd21631867be159a9dea6a9cfff6524e5eeaddc714",
+    },
+    {
+        "qualification": "25167ffc2e3bc3717fd43bc3902b2baa200427130ef773039c644486db7767c6",
+        "biography": "ec4188d7bdc918e7341ad169cb37bc9f7de3e256cb4463de34b71ee7b0924025",
+    },
+    {
+        "qualification": "11227aaf2d06b7489848da7550d95adf73c792edffb8a462c0ad489cb83ae3e8",
+        "biography": "7855839fe986ca7464d51fc53cd080cdfc9f6afbe2d5a9d3f8e5b01c4d62f11f",
+    },
+    {
+        "qualification": "e91e207fc44065967435b464ec6709e9f8643492fdb730aae9c3e876b677e8d9",
+        "biography": "273393128ebe2910fa9b35655b06a84e7f3a87d7d2d710cc9d6c3bed60cc6ed1",
+    },
+]
+_PREVIOUS_SPECIALTIES = [
+    "General Medicine",
+    "Dermatology",
+    "Neurology",
+    "Cardiology",
+    "Pediatrics",
+    "Orthopedics",
 ]
 
 
 def refresh_demo_cast():
-    """Upgrade only the six original demo identities, without reseeding any data.
+    """Update seeded identities and remove superseded generated profile text.
 
-    Matching both stable IDs and legacy names keeps new/admin-edited profiles
-    untouched. Once renamed, a profile no longer matches, so subsequent starts
-    preserve edits to the character's biography, fee and availability as well.
+    Existing character profiles are changed field by field only when the value
+    matches a previous generated default. Accounts and booking data stay intact.
     """
     if PRODUCTION or os.getenv("SEED_DEMO", "1") != "1":
         return
@@ -73,6 +109,28 @@ def refresh_demo_cast():
                 (did, user_id, legacy),
             ).fetchone()
             if not original:
+                record = c.execute(
+                    "SELECT d.* FROM doctors d JOIN users u USING(user_id) WHERE d.doctor_id=? AND d.user_id=? AND u.full_name=? AND u.role='doctor'",
+                    (did, user_id, character["name"]),
+                ).fetchone()
+                if not record:
+                    continue
+                updates = {
+                    field: character[field]
+                    for field, fingerprint in _PREVIOUS_DEFAULTS[i].items()
+                    if sha256(record[field].encode()).hexdigest() == fingerprint
+                }
+                if updates and record["specialization"] == _PREVIOUS_SPECIALTIES[i]:
+                    updates["specialization"] = spec
+                if updates:
+                    c.execute(
+                        "INSERT OR IGNORE INTO specializations VALUES(?)", (spec,)
+                    )
+                    assignments = ",".join(f"{field}=?" for field in updates)
+                    c.execute(
+                        f"UPDATE doctors SET {assignments} WHERE doctor_id=?",
+                        (*updates.values(), did),
+                    )
                 continue
             c.execute("INSERT OR IGNORE INTO specializations VALUES(?)", (spec,))
             c.execute(

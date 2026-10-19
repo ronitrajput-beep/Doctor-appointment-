@@ -471,10 +471,7 @@ def test_profile_notifications_search(env):
     assert [d["consultation_fee"] for d in doctors] == sorted(
         d["consultation_fee"] for d in doctors
     )
-    assert (
-        len(p.get("/api/doctors?specialization=General%20Medicine&q=Jhatka").json())
-        == 1
-    )
+    assert len(p.get("/api/doctors?specialization=Cardiology&q=Jhatka").json()) == 1
     assert p.get("/api/health").json()["database"] == 1
 
 
@@ -594,3 +591,21 @@ def test_cast_upgrade_skips_customized_users_and_disabled_demo_mode(env, monkeyp
         db.one("SELECT full_name FROM users WHERE user_id='user-doctor-2'")["full_name"]
         == "Jagdish Asthana"
     )
+
+
+def test_previous_generated_profile_cleanup_preserves_custom_fields(env):
+    from app.seed import seed, CAST
+
+    with db.transaction() as c:
+        c.execute(
+            "UPDATE doctors SET qualification=?,biography=?,specialization='General Medicine',consultation_fee=777 WHERE doctor_id='doctor-1'",
+            ("Motu Patlu · PhD in accidental inventions", "My custom biography."),
+        )
+    seed()
+    record = db.one("SELECT * FROM doctors WHERE doctor_id='doctor-1'")
+    assert record["qualification"] == CAST[0]["qualification"] == "MBBS, MD"
+    assert record["biography"] == "My custom biography."
+    assert record["specialization"] == "Cardiology"
+    assert record["consultation_fee"] == 777
+    seed()
+    assert record == db.one("SELECT * FROM doctors WHERE doctor_id='doctor-1'")
