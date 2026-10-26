@@ -26,6 +26,8 @@ The launcher installs dependencies, builds the website, creates fictional sample
 
 `Start-Mac.command` is an alternative launcher. If macOS blocks double-clicking a downloaded script or its executable permission was lost during extraction, use the Terminal command above; do not disable macOS security settings.
 
+To use another local port, run `PORT=8010 bash start.sh`, then open `http://localhost:8010`. The backend uses `PORT` for its default local allowed origins. An explicitly configured `ALLOWED_ORIGINS` takes precedence.
+
 ## Updating an existing Mac installation
 
 Stop the old app with Control+C and keep a backup of its project folder. Extract the updated download into a separate folder. Copy your **entire `database` folder** and **`DEMO_ACCOUNTS.md`** from the old project into the new folder, replacing its empty database folder, then run `bash start.sh` from the new folder. Do not copy an actively running SQLite database. This keeps your accounts/bookings and automatically upgrades the six original doctor profiles. A fresh installation instead generates fresh local accounts.

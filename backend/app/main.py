@@ -23,11 +23,13 @@ async def lifespan(app):
 
 
 app = FastAPI(title="Aurelia Care", version="1.0.0", lifespan=lifespan)
+app_port = os.getenv("PORT", "8000")
 origins = [
     x.strip()
     for x in os.getenv(
         "ALLOWED_ORIGINS",
-        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:8000,http://127.0.0.1:8000",
+        "http://localhost:5173,http://127.0.0.1:5173,"
+        f"http://localhost:{app_port},http://127.0.0.1:{app_port}",
     ).split(",")
 ]
 app.add_middleware(
