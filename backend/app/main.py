@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from . import database as db, schemas as s, security as auth, appointments as ap, excel
 from .seed import seed
+from . import clinical
 
 
 @asynccontextmanager
@@ -214,7 +215,7 @@ def availability(id: str):
     return [
         r
         for r in db.rows(
-            "SELECT s.* FROM availability s JOIN doctors d USING(doctor_id) JOIN users u USING(user_id) WHERE doctor_id=? AND u.active=1 AND status='available' ORDER BY appointment_date,start_time",
+            "SELECT s.* FROM availability s JOIN doctors d USING(doctor_id) JOIN users u USING(user_id) WHERE doctor_id=? AND u.active=1 AND status='available' AND NOT EXISTS (SELECT 1 FROM doctor_time_off t WHERE t.doctor_id=s.doctor_id AND t.starts_at<s.appointment_date||'T'||s.end_time AND t.ends_at>s.appointment_date||'T'||s.start_time) ORDER BY appointment_date,start_time",
             (id,),
         )
         if ap.instant(r["appointment_date"], r["start_time"]) > db.now()
@@ -297,10 +298,17 @@ def own_doctor_update(body: s.Doctor, user=Depends(doctor)):
 
 @app.get("/api/doctor/availability")
 def own_availability(user=Depends(doctor)):
-    return db.rows(
-        "SELECT * FROM availability WHERE doctor_id=? AND appointment_date>=? ORDER BY appointment_date,start_time",
-        (doctor_for(user)["doctor_id"], db.now().date().isoformat()),
-    )
+    with db.transaction() as c:
+        rows = [
+            dict(row)
+            for row in c.execute(
+                "SELECT * FROM availability WHERE doctor_id=? AND appointment_date>=? ORDER BY appointment_date,start_time",
+                (doctor_for(user)["doctor_id"], db.now().date().isoformat()),
+            ).fetchall()
+        ]
+        for row in rows:
+            row["time_off"] = ap.on_time_off(c, row)
+    return rows
 
 
 @app.post("/api/doctor/availability", status_code=201)
@@ -316,6 +324,18 @@ def add_slot(body: s.Slot, user=Depends(doctor)):
             422, "Choose a future slot with an end time after its start."
         )
     with db.transaction() as c:
+        if ap.on_time_off(
+            c,
+            {
+                "doctor_id": did,
+                "appointment_date": day,
+                "start_time": start,
+                "end_time": end,
+            },
+        ):
+            raise HTTPException(
+                409, "This time is covered by leave or an unavailable period."
+            )
         existing = c.execute(
             "SELECT * FROM availability WHERE doctor_id=? AND appointment_date=? AND start_time<? AND end_time>?",
             (did, day, end, start),
@@ -357,9 +377,67 @@ def remove_slot(id: str, user=Depends(doctor)):
     return {"message": "Slot removed from public availability."}
 
 
+@app.get("/api/patient/medical-history")
+def medical_history(user=Depends(patient)):
+    return clinical.history_for_user(user)
+
+
+@app.patch("/api/patient/medical-history")
+def save_medical_history(body: s.MedicalHistory, user=Depends(patient)):
+    return clinical.save_history(user, body)
+
+
+@app.get("/api/doctor/patients")
+def doctor_patients(user=Depends(doctor)):
+    return clinical.patients(user)
+
+
+@app.get("/api/doctor/patients/{id}")
+def doctor_patient(id: str, user=Depends(doctor)):
+    return clinical.patient_detail(user, id)
+
+
+@app.get("/api/doctor/time-off")
+def time_off(user=Depends(doctor)):
+    return clinical.time_off(user)
+
+
+@app.post("/api/doctor/time-off", status_code=201)
+def add_time_off(body: s.TimeOff, user=Depends(doctor)):
+    return clinical.add_time_off(user, body)
+
+
+@app.delete("/api/doctor/time-off/{id}")
+def remove_time_off(id: str, user=Depends(doctor)):
+    return clinical.remove_time_off(user, id)
+
+
+@app.get("/api/doctor/export/{kind}")
+def doctor_export(kind: str, user=Depends(doctor)):
+    if kind not in ("patients", "appointments", "workspace"):
+        raise HTTPException(404, "Export not found.")
+    return Response(
+        clinical.export(user, kind),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f'attachment; filename="My_{kind.title()}_Doctor.xlsx"'
+        },
+    )
+
+
+@app.patch("/api/notifications/read-all")
+def read_all_notices(user=Depends(auth.current)):
+    with db.transaction() as c:
+        c.execute(
+            "UPDATE notifications SET notification_status='read' WHERE user_id=?",
+            (user["user_id"],),
+        )
+    return {"message": "All notifications marked as read."}
+
+
 @app.get("/api/notifications")
 def notifications(user=Depends(auth.current)):
-    if user["role"] == "patient":
+    if user["role"] in ("patient", "doctor"):
         with db.transaction() as c:
             for a in ap.listing(user):
                 if a["booking_status"] == "confirmed" and db.now() < ap.instant(

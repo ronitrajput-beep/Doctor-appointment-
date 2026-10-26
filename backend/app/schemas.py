@@ -71,3 +71,28 @@ class Password(Model):
 
 class Specialization(Model):
     name: str = Field(min_length=2, max_length=80)
+
+
+class MedicalHistory(Model):
+    date_of_birth: date | None = None
+    blood_group: Literal["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] = ""
+    allergies: str = Field(default="", max_length=3000)
+    conditions: str = Field(default="", max_length=3000)
+    medications: str = Field(default="", max_length=3000)
+    surgeries: str = Field(default="", max_length=3000)
+    family_history: str = Field(default="", max_length=3000)
+    other_notes: str = Field(default="", max_length=3000)
+
+
+class TimeOff(Model):
+    start_date: date
+    end_date: date
+    start_time: time = time(0, 0)
+    end_time: time = time(23, 59)
+    kind: Literal["leave", "unavailable"] = "leave"
+    note: str = Field(default="", max_length=300)
+
+    @field_validator("start_time", "end_time")
+    @classmethod
+    def minutes(cls, v):
+        return Slot.minutes(v)

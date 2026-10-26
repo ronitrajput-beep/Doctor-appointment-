@@ -18,5 +18,6 @@ PYTHONPATH=backend .venv/bin/python -m app.manage init
 echo ''
 echo "Aurelia Care is starting. Open http://localhost:${PORT:-8000} in your browser."
 echo 'Your local account passwords are in DEMO_ACCOUNTS.md in this folder.'
+echo 'Doctor names, emails and passwords are also listed in DOCTOR_LOGINS.md.'
 echo 'Keep this Terminal window open. Press Control+C to stop.'
 exec .venv/bin/python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port "${PORT:-8000}"

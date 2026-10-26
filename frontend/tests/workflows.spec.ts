@@ -2,7 +2,7 @@ import { test, expect, Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
 const credentials = fs.readFileSync(
-  path.resolve("../DEMO_ACCOUNTS.md"),
+  process.env.DEMO_ACCOUNTS_PATH || path.resolve("../DEMO_ACCOUNTS.md"),
   "utf8",
 );
 function password(email: string) {
@@ -167,7 +167,8 @@ test("doctor availability publication and removal", async ({ page }) => {
   const slot = page.locator(".schedule-card").filter({ hasText: "18:00" });
   await expect(slot).toBeVisible();
   await slot.getByRole("button", { name: "Remove slot" }).click();
-  await expect(slot).toHaveCount(0);
+  await expect(slot.locator(".badge")).toHaveText("blocked");
+  await expect(slot.getByRole("button", { name: "Reopen slot" })).toBeVisible();
   await page
     .getByRole("navigation", { name: "Dashboard" })
     .getByRole("link", { name: "My profile" })

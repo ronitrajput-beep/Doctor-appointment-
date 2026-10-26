@@ -297,6 +297,10 @@ def import_workbook(data, filename, dry_run=True):
                         )
             checks = [
                 (
+                    "SELECT 1 FROM appointments a JOIN availability s USING(slot_id) JOIN doctor_time_off t ON t.doctor_id=a.doctor_id WHERE a.booking_status='confirmed' AND t.starts_at<s.appointment_date||'T'||s.end_time AND t.ends_at>s.appointment_date||'T'||s.start_time",
+                    "A confirmed appointment cannot overlap doctor leave or unavailable periods.",
+                ),
+                (
                     "SELECT 1 FROM patients p JOIN users u USING(user_id) WHERE u.role!='patient'",
                     "Patient accounts must have the patient role.",
                 ),

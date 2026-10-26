@@ -48,3 +48,16 @@ Optional scope excluded: receptionist role, prescriptions, diagnostics, lab tech
 ## Character roster update — 19 October 2026
 
 At the user's request, the six realistic fictional doctor identities were replaced by doctors/scientists from cartoons, movies and anime, including Dr. Jhatka. Only names and portraits change; the interface retains normal clinic copy, qualifications and biographies. The appointment entities, workflows, access controls and Excel schemas are unchanged. An idempotent startup upgrade changes only the original seeded profiles and preserves existing bookings, payments, account credentials and later administrator edits. This deliberate presentation change supersedes the original preference for realistic clinician portraits.
+
+
+## Two-sided doctor workspace — 26 October 2026
+
+| New requirement | Implementation | Verification |
+|---|---|---|
+| Individual named doctor logins and dedicated layout | Existing six users retained; private DOCTOR_LOGINS.md generated; doctor-specific shell and sign-in | Six account/role checks; doctor browser workflows |
+| Doctor patient histories and patient self-entry | medical_histories, patient-owned edit API, scoped doctor patient API | Cross-doctor/cross-patient denial, cancellation revocation, update/clear/restart checks |
+| Available, blocked, and leave periods | doctor_time_off with overlap checks; slot list/booking/import guards; block/reopen UI | Leave conflict, boundary, public booking and workbook rollback checks |
+| Direct doctor Excel downloads | Scoped patient, appointment and workspace XLSX exports | Ownership and formula-safety checks; browser download validation |
+| Appointment/history alerts and reminders | Scoped notifications, mark-all-read, 15-second polling | Ownership checks; browser alert without reload |
+
+Doctors administer their own practice data, not the full clinic. A confirmed/completed consultation grants history access; cancelled-only records do not. Global account management and the full clinic workbook remain administrator-only. This extension preserves prior source and documentation snapshots while changing the implemented feature baseline.

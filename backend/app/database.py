@@ -73,6 +73,9 @@ def initialize():
     CREATE TABLE IF NOT EXISTS payments(payment_id TEXT PRIMARY KEY,appointment_id TEXT NOT NULL UNIQUE REFERENCES appointments(appointment_id),amount REAL NOT NULL CHECK(amount>=0),payment_method TEXT NOT NULL CHECK(payment_method='simulation'),payment_status TEXT NOT NULL CHECK(payment_status IN ('simulated_paid','refunded')),transaction_reference TEXT NOT NULL UNIQUE);
     CREATE TABLE IF NOT EXISTS notifications(notification_id TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(user_id),appointment_id TEXT REFERENCES appointments(appointment_id),message TEXT NOT NULL,notification_status TEXT NOT NULL CHECK(notification_status IN ('unread','read')),created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS sessions(jti TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(user_id),expires_at INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS medical_histories(patient_id TEXT PRIMARY KEY REFERENCES patients(patient_id),date_of_birth TEXT NOT NULL DEFAULT '',blood_group TEXT NOT NULL DEFAULT '',allergies TEXT NOT NULL DEFAULT '',conditions TEXT NOT NULL DEFAULT '',medications TEXT NOT NULL DEFAULT '',surgeries TEXT NOT NULL DEFAULT '',family_history TEXT NOT NULL DEFAULT '',other_notes TEXT NOT NULL DEFAULT '',updated_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS doctor_time_off(leave_id TEXT PRIMARY KEY,doctor_id TEXT NOT NULL REFERENCES doctors(doctor_id),starts_at TEXT NOT NULL,ends_at TEXT NOT NULL,kind TEXT NOT NULL CHECK(kind IN ('leave','unavailable')),note TEXT NOT NULL DEFAULT '',CHECK(starts_at<ends_at));
+    CREATE INDEX IF NOT EXISTS doctor_time_off_range ON doctor_time_off(doctor_id,starts_at,ends_at);
     CREATE INDEX IF NOT EXISTS appointments_patient ON appointments(patient_id);
     CREATE INDEX IF NOT EXISTS appointments_doctor ON appointments(doctor_id,appointment_date);
     """

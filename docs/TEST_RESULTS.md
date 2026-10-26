@@ -20,3 +20,8 @@ Normal clinic wording, qualifications and biographies are retained. Only charact
 Updated screenshots are in `screenshots/`. The generated image assets are illustrated character fan art, documented in `docs/ASSETS.md`. The old realistic clinician contact sheet is removed.
 
 The shared Bash launcher and cloud setup script were exercised during the 17 October rebuild and are unchanged by this update. Native Mac and Windows execution, a sustained 200-user workload, production uptime, real payments/email/SMS and a complete accessibility audit are not claimed. Pytest reports one upstream Starlette/AnyIO deprecation warning.
+
+
+## Current doctor workspace extension
+
+The 26 October extension has a separate verification record: [DOCTOR_WORKSPACE_TEST_RESULTS.md](DOCTOR_WORKSPACE_TEST_RESULTS.md). The current suite passed 41 backend tests and 9 browser workflows. The dated results above describe the earlier baseline.

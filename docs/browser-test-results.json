@@ -55,7 +55,7 @@
         "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
         "timeout": 45000,
         "use": {
-          "baseURL": "http://127.0.0.1:8000",
+          "baseURL": "http://127.0.0.1:8020",
           "headless": true,
           "reducedMotion": "reduce",
           "viewport": {
@@ -101,6 +101,184 @@
   },
   "suites": [
     {
+      "title": "clinical.spec.ts",
+      "file": "clinical.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "patient edits medical history and sees it after refresh",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1186,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T04:36:01.146Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "054aa3c25ca066a21c11-179f4cc75537ee64eee4",
+          "file": "clinical.spec.ts",
+          "line": 34,
+          "column": 1
+        },
+        {
+          "title": "doctor portal shows own patients, history and direct Excel downloads",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1387,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T04:36:02.565Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "054aa3c25ca066a21c11-d10b545c57b32ada888c",
+          "file": "clinical.spec.ts",
+          "line": 67,
+          "column": 1
+        },
+        {
+          "title": "doctor leave hides times and removal restores them",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1326,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T04:36:03.967Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "054aa3c25ca066a21c11-e18a8a17b611252e817a",
+          "file": "clinical.spec.ts",
+          "line": 121,
+          "column": 1
+        },
+        {
+          "title": "different doctor cannot see a cancelled-only patient history",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 739,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T04:36:05.305Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "054aa3c25ca066a21c11-96aa53c495f91e848b51",
+          "file": "clinical.spec.ts",
+          "line": 173,
+          "column": 1
+        },
+        {
+          "title": "doctor receives a new booking notification while the page remains open",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15756,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-26T04:36:06.066Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "054aa3c25ca066a21c11-da7dd7e5780c5d6aa261",
+          "file": "clinical.spec.ts",
+          "line": 191,
+          "column": 1
+        }
+      ]
+    },
+    {
       "title": "workflows.spec.ts",
       "file": "workflows.spec.ts",
       "column": 0,
@@ -122,12 +300,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2451,
+                  "duration": 2235,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-19T05:34:58.799Z",
+                  "startTime": "2026-10-26T04:36:21.851Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -156,12 +334,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2148,
+                  "duration": 1962,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-19T05:35:01.502Z",
+                  "startTime": "2026-10-26T04:36:24.099Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -190,12 +368,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1035,
+                  "duration": 1450,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-19T05:35:03.683Z",
+                  "startTime": "2026-10-26T04:36:26.072Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -224,12 +402,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1412,
+                  "duration": 1552,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-19T05:35:04.729Z",
+                  "startTime": "2026-10-26T04:36:27.530Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -239,7 +417,7 @@
           ],
           "id": "26aa48cee8983222f549-c4ba2fabc0968b7712a4",
           "file": "workflows.spec.ts",
-          "line": 180,
+          "line": 181,
           "column": 1
         }
       ]
@@ -247,9 +425,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-19T05:34:58.399Z",
-    "duration": 7832.821,
-    "expected": 4,
+    "startTime": "2026-10-26T04:36:00.639Z",
+    "duration": 28556.503,
+    "expected": 9,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

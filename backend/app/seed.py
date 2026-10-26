@@ -3,7 +3,7 @@ from hashlib import sha256
 import secrets
 from datetime import timedelta
 from . import database as db
-from .security import hash_password, PRODUCTION
+from .security import hash_password, verify, PRODUCTION
 
 SPECIALTIES = [
     "Cardiology",
@@ -168,13 +168,14 @@ def seed():
         return
     if db.one("SELECT user_id FROM users LIMIT 1"):
         refresh_demo_cast()
+        write_doctor_logins()
         return
     accounts = []
     with db.transaction() as c:
 
         def user(user_id, name, email, role):
             password = secrets.token_urlsafe(12)
-            accounts.append(f"| {role} | {email} | {password} |")
+            accounts.append(f"| {role} | {email} | {password} | {name} |")
             c.execute(
                 "INSERT INTO users VALUES(?,?,?,?,?,?,?,1)",
                 (
@@ -271,9 +272,43 @@ def seed():
             )
     credential_path = db.DB_PATH.parent.parent / "DEMO_ACCOUNTS.md"
     credential_path.write_text(
-        "# Local demonstration accounts\n\nGenerated for this installation. Fictional data only. Never publish these passwords.\n\n| Role | Email | Password |\n|---|---|---|\n"
+        "# Local demonstration accounts\n\nGenerated for this installation. Fictional data only. Never publish these passwords.\n\n| Role | Email | Password | Name |\n|---|---|---|---|\n"
         + "\n".join(accounts)
         + "\n"
     )
     credential_path.chmod(0o600)
+    write_doctor_logins()
     demo_slots()
+
+
+def write_doctor_logins():
+    """Create a local-only name-to-login guide without changing any password."""
+    if PRODUCTION or os.getenv("SEED_DEMO", "1") != "1":
+        return
+    root = db.DB_PATH.parent.parent
+    source = root / "DEMO_ACCOUNTS.md"
+    if not source.exists():
+        return
+    passwords = {}
+    for line in source.read_text().splitlines():
+        columns = [p.strip() for p in line.split("|")]
+        if len(columns) >= 5 and columns[1] == "doctor":
+            passwords[columns[2]] = columns[3]
+    rows = []
+    for doctor in db.rows(
+        "SELECT u.full_name,u.email,u.password_hash FROM users u JOIN doctors d USING(user_id) WHERE role='doctor' ORDER BY d.image,u.full_name"
+    ):
+        password = passwords.get(doctor["email"], "")
+        value = (
+            password
+            if password and verify(password, doctor["password_hash"])
+            else "Ask the administrator to reset this password."
+        )
+        rows.append(f"| Dr. {doctor['full_name']} | {doctor['email']} | {value} |")
+    target = root / "DOCTOR_LOGINS.md"
+    target.write_text(
+        "# Doctor demonstration logins\n\nPrivate: generated for this installation only. Never upload this file to GitHub.\n\nSign in using the Doctor sign in page. These accounts cannot book appointments.\n\n| Doctor | Email | Password |\n|---|---|---|\n"
+        + "\n".join(rows)
+        + "\n"
+    )
+    target.chmod(0o600)

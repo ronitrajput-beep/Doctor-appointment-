@@ -35,28 +35,17 @@ import {
   WorkbookResult,
 } from "./types";
 import { useAuth } from "./context";
+import { useData } from "./hooks";
+import {
+  DoctorOverview,
+  DoctorPatients,
+  DoctorDownloads,
+  DoctorTimeOff,
+  DownloadButton,
+  MedicalHistoryForm,
+} from "./clinical";
 import { ErrorBox, Loading, Empty, Modal } from "./components";
 
-function useData<T>(path: string) {
-  const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState("");
-  const [version, setVersion] = useState(0);
-  useEffect(() => {
-    let active = true;
-    setError("");
-    api<T>(path)
-      .then((x) => {
-        if (active) setData(x);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [path, version]);
-  return { data, error, reload: () => setVersion((v) => v + 1) };
-}
 function Title({
   title,
   description,
@@ -81,7 +70,7 @@ function Guard({
   role,
   children,
 }: {
-  role: "doctor" | "admin";
+  role: "doctor" | "admin" | "patient";
   children: ReactNode;
 }) {
   const { user } = useAuth();
@@ -95,13 +84,20 @@ export function Dashboard() {
   const { user, loading, logout } = useAuth();
   const nav = useNavigate();
   const [error, setError] = useState("");
+  const notices = useData<Notice[]>("/notifications", user ? 15000 : 0);
+  const unread =
+    notices.data?.filter((n) => n.notification_status === "unread").length || 0;
   if (loading) return <Loading />;
   if (!user) return <Navigate to="/login" replace />;
   const links = [
     ["", "Overview", LayoutDashboard],
     ["appointments", "Appointments", CalendarDays],
     ...(user.role === "doctor"
-      ? [["availability", "Availability", Clock]]
+      ? [
+          ["patients", "My patients", Users],
+          ["availability", "Availability", Clock],
+          ["downloads", "Excel downloads", FileSpreadsheet],
+        ]
       : []),
     ...(user.role === "admin"
       ? [
@@ -111,11 +107,18 @@ export function Dashboard() {
           ["reports", "Reports", BarChart3],
         ]
       : []),
+    ...(user.role === "patient"
+      ? [["medical-history", "Medical history", Stethoscope]]
+      : []),
     ["notifications", "Notifications", Bell],
     ["profile", "My profile", Settings],
   ] as [string, string, typeof LayoutDashboard][];
   return (
-    <div className="dashboard-shell">
+    <div
+      className={
+        "dashboard-shell " + (user.role === "doctor" ? "doctor-workspace" : "")
+      }
+    >
       <aside className="sidebar">
         <div className="account-card">
           <div className="avatar">
@@ -125,8 +128,15 @@ export function Dashboard() {
               .slice(0, 2)
               .join("")}
           </div>
-          <strong>{user.full_name}</strong>
-          <span>{user.role} account</span>
+          <strong>
+            {user.role === "doctor" ? "Dr. " : ""}
+            {user.full_name}
+          </strong>
+          <span>
+            {user.role === "doctor"
+              ? "Your private practice desk"
+              : user.role + " account"}
+          </span>
         </div>
         <nav aria-label="Dashboard">
           {links.map(([path, title, Icon]) => (
@@ -137,6 +147,14 @@ export function Dashboard() {
             >
               <Icon size={18} />
               {title}
+              {path === "notifications" && unread > 0 && (
+                <span
+                  className="unread-count"
+                  aria-label={`${unread} unread notifications`}
+                >
+                  {unread}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -155,12 +173,42 @@ export function Dashboard() {
         </button>
         <ErrorBox message={error} />
         <div className="sidebar-note">
-          <HeartNote />A little time for your health goes a long way.
+          <HeartNote />
+          {user.role === "doctor"
+            ? "Your schedule. Your patients. Thoughtful care."
+            : "A little time for your health goes a long way."}
         </div>
       </aside>
       <div className="dashboard-content">
         <Routes>
-          <Route index element={<Overview />} />
+          <Route
+            index
+            element={user.role === "doctor" ? <DoctorOverview /> : <Overview />}
+          />
+          <Route
+            path="patients"
+            element={
+              <Guard role="doctor">
+                <DoctorPatients />
+              </Guard>
+            }
+          />
+          <Route
+            path="downloads"
+            element={
+              <Guard role="doctor">
+                <DoctorDownloads />
+              </Guard>
+            }
+          />
+          <Route
+            path="medical-history"
+            element={
+              <Guard role="patient">
+                <MedicalHistoryForm />
+              </Guard>
+            }
+          />
           <Route path="appointments" element={<Appointments />} />
           <Route
             path="availability"
@@ -285,6 +333,21 @@ function Overview() {
           <ArrowUpRight size={16} />
         </Link>
       </div>
+      {user?.role === "patient" && (
+        <Link
+          to="/dashboard/medical-history"
+          className="patient-history-prompt"
+        >
+          <Stethoscope size={25} />
+          <div>
+            <strong>Help your doctor prepare for your visit</strong>
+            <span>
+              Add or update your medical history, allergies, and medications.
+            </span>
+          </div>
+          <ArrowUpRight size={20} />
+        </Link>
+      )}
       <div className="stats-grid">
         {Object.entries(counts)
           .filter(([k]) => k !== "confirmed")
@@ -369,6 +432,14 @@ function AppointmentCard({
               {a.patient_email} · {a.patient_phone}
             </p>
             <p>{a.profile_details || "No additional patient notes."}</p>
+            {user?.role === "doctor" && a.booking_status !== "cancelled" && (
+              <Link
+                className="text-link"
+                to={`/dashboard/patients?patient=${a.patient_id}`}
+              >
+                View medical history <ArrowUpRight size={15} />
+              </Link>
+            )}
           </details>
         )}
         <small className="reference">
@@ -381,7 +452,10 @@ function AppointmentCard({
 }
 function Appointments() {
   const { user } = useAuth();
-  const { data, error, reload } = useData<Appointment[]>("/appointments");
+  const { data, error, reload } = useData<Appointment[]>(
+    "/appointments",
+    user?.role === "doctor" ? 15000 : 0,
+  );
   const [status, setStatus] = useState("");
   const [date, setDate] = useState("");
   const [doc, setDoc] = useState("");
@@ -431,9 +505,19 @@ function Appointments() {
   return (
     <>
       <Title
-        title="Your appointments"
+        title={
+          user?.role === "doctor"
+            ? "Your consultation schedule"
+            : "Your appointments"
+        }
         description="Every consultation, thoughtfully organized. All times are in IST."
-      />
+      >
+        {user?.role === "doctor" && (
+          <DownloadButton kind="appointments">
+            Download appointments Excel
+          </DownloadButton>
+        )}
+      </Title>
       {user?.role === "patient" && (
         <Link to="/doctors" className="button dark">
           <Plus size={17} /> Book an appointment
@@ -587,7 +671,11 @@ function Appointments() {
   );
 }
 function Availability() {
-  const { data, error, reload } = useData<Slot[]>("/doctor/availability");
+  const { data, error, reload } = useData<(Slot & { time_off?: boolean })[]>(
+    "/doctor/availability",
+    15000,
+  );
+  const [scheduleStatus, setScheduleStatus] = useState("");
   const [date, setDate] = useState("");
   const [message, setMessage] = useState("");
   const [actionError, setError] = useState("");
@@ -653,8 +741,21 @@ function Availability() {
           </p>
         )}
       </form>
-      <div className="section-title">
+      <DoctorTimeOff onChanged={reload} />
+      <div className="section-title schedule-heading">
         <h2>Your schedule</h2>
+        <label>
+          Slot status
+          <select
+            value={scheduleStatus}
+            onChange={(e) => setScheduleStatus(e.target.value)}
+          >
+            <option value="">All statuses</option>
+            <option value="available">Available</option>
+            <option value="booked">Booked</option>
+            <option value="blocked">Blocked</option>
+          </select>
+        </label>
         <label>
           Filter date
           <input
@@ -671,7 +772,7 @@ function Availability() {
             .filter(
               (s) =>
                 (!date || s.appointment_date === date) &&
-                s.status !== "blocked",
+                (!scheduleStatus || s.status === scheduleStatus),
             )
             .map((s) => (
               <div className="schedule-card" key={s.slot_id}>
@@ -679,7 +780,31 @@ function Availability() {
                 <strong>
                   {s.start_time} – {s.end_time} IST
                 </strong>
-                <span className={"badge " + s.status}>{s.status}</span>
+                <span className={"badge " + s.status}>
+                  {s.time_off && s.status === "available"
+                    ? "Unavailable period"
+                    : s.status}
+                </span>
+                {s.status === "blocked" && (
+                  <button
+                    className="text-link"
+                    onClick={async () => {
+                      setError("");
+                      try {
+                        await api("/doctor/availability", "POST", {
+                          appointment_date: s.appointment_date,
+                          start_time: s.start_time,
+                          end_time: s.end_time,
+                        });
+                        reload();
+                      } catch (e) {
+                        setError((e as Error).message);
+                      }
+                    }}
+                  >
+                    Reopen slot
+                  </button>
+                )}
                 {s.status === "available" && (
                   <button
                     className="text-link danger-text"
@@ -692,7 +817,8 @@ function Availability() {
             ))}
           {!data.some(
             (s) =>
-              (!date || s.appointment_date === date) && s.status !== "blocked",
+              (!date || s.appointment_date === date) &&
+              (!scheduleStatus || s.status === scheduleStatus),
           ) && <Empty>No published slots for this date.</Empty>}
         </div>
       ) : (
@@ -1323,14 +1449,30 @@ function Reports() {
   );
 }
 function Notifications() {
-  const { data, error, reload } = useData<Notice[]>("/notifications");
+  const { data, error, reload } = useData<Notice[]>("/notifications", 15000);
   const [actionError, setError] = useState("");
   return (
     <>
       <Title
         title="You’re in the loop"
-        description="Appointment confirmations, changes, and reminders in one place."
-      />
+        description="Appointment confirmations, changes, and reminders in one place. Updates refresh every 15 seconds."
+      >
+        <button
+          className="button outline"
+          disabled={!data?.some((n) => n.notification_status === "unread")}
+          onClick={async () => {
+            try {
+              await api("/notifications/read-all", "PATCH");
+              reload();
+              window.dispatchEvent(new Event("focus"));
+            } catch (e) {
+              setError((e as Error).message);
+            }
+          }}
+        >
+          Mark all as read
+        </button>
+      </Title>
       <ErrorBox message={error || actionError} />
       {data ? (
         data.length ? (

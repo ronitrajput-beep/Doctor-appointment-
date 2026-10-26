@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
 import { Header, Footer } from "./components";
 import {
   Home,
@@ -9,7 +9,19 @@ import {
   About,
 } from "./pages";
 import { Dashboard } from "./dashboard";
+import { useAuth } from "./context";
 export default function App() {
+  const { user } = useAuth();
+  const loc = useLocation();
+  const clinician = user?.role === "doctor";
+  if (
+    clinician &&
+    (loc.pathname === "/" ||
+      loc.pathname.startsWith("/doctors") ||
+      loc.pathname === "/register" ||
+      loc.pathname.startsWith("/appointments/"))
+  )
+    return <Navigate to="/dashboard" replace />;
   return (
     <>
       <a href="#main" className="skip-link">
@@ -42,7 +54,7 @@ export default function App() {
           />
         </Routes>
       </main>
-      <Footer />
+      {!clinician && <Footer />}
     </>
   );
 }

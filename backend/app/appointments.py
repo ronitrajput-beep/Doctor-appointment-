@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from fastapi import HTTPException
 from . import database as db
 
-SELECT = """SELECT a.*, du.full_name AS doctor_name,d.specialization,d.consultation_fee,pu.full_name AS patient_name,pu.email AS patient_email,pu.phone AS patient_phone,p.profile_details,pay.amount,pay.payment_status,pay.transaction_reference FROM appointments a JOIN doctors d ON d.doctor_id=a.doctor_id JOIN users du ON du.user_id=d.user_id JOIN patients p ON p.patient_id=a.patient_id JOIN users pu ON pu.user_id=p.user_id JOIN payments pay ON pay.appointment_id=a.appointment_id"""
+SELECT = """SELECT a.*, du.full_name AS doctor_name,d.specialization,d.consultation_fee,pu.full_name AS patient_name,pu.email AS patient_email,pu.phone AS patient_phone,CASE WHEN a.booking_status!='cancelled' THEN p.profile_details ELSE '' END AS profile_details,pay.amount,pay.payment_status,pay.transaction_reference FROM appointments a JOIN doctors d ON d.doctor_id=a.doctor_id JOIN users du ON du.user_id=d.user_id JOIN patients p ON p.patient_id=a.patient_id JOIN users pu ON pu.user_id=p.user_id JOIN payments pay ON pay.appointment_id=a.appointment_id"""
 
 
 def instant(day, time):
@@ -52,7 +52,26 @@ def available(c, sid):
         )
     if instant(s["appointment_date"], s["start_time"]) <= db.now():
         raise HTTPException(422, "Choose a future appointment.")
+    if on_time_off(c, s):
+        raise HTTPException(
+            409,
+            "The doctor is unavailable during this time. Please choose another slot.",
+        )
     return s
+
+
+def on_time_off(c, slot):
+    return (
+        c.execute(
+            "SELECT 1 FROM doctor_time_off WHERE doctor_id=? AND starts_at<? AND ends_at>?",
+            (
+                slot["doctor_id"],
+                slot["appointment_date"] + "T" + slot["end_time"],
+                slot["appointment_date"] + "T" + slot["start_time"],
+            ),
+        ).fetchone()
+        is not None
+    )
 
 
 def book(user, body):

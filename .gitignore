@@ -7,6 +7,7 @@ __pycache__/
 database/*
 !database/.gitkeep
 DEMO_ACCOUNTS.md
+DOCTOR_LOGINS.md
 *.zip
 test-results/
 playwright-report/

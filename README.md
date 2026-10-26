@@ -32,6 +32,12 @@ To use another local port, run `PORT=8010 bash start.sh`, then open `http://loca
 
 Stop the old app with Control+C and keep a backup of its project folder. Extract the updated download into a separate folder. Copy your **entire `database` folder** and **`DEMO_ACCOUNTS.md`** from the old project into the new folder, replacing its empty database folder, then run `bash start.sh` from the new folder. Do not copy an actively running SQLite database. This keeps your accounts/bookings and automatically upgrades the six original doctor profiles. A fresh installation instead generates fresh local accounts.
 
+## Doctor portal and patient medical history
+
+Doctors now have a dedicated practice workspace: their own appointments and patients, patient-provided medical histories, availability and leave, notifications, and one-click patient/appointment/workspace Excel downloads. Patients can maintain their own structured medical history through the dashboard. Only doctors with a confirmed or completed appointment with a patient can view that history. Doctor accounts cannot book appointments or download other doctors’ records.
+
+After startup, open **DOCTOR_LOGINS.md** for the six named doctors’ installation-specific login details. This file and DEMO_ACCOUNTS.md must stay private. See [the doctor workspace guide](docs/DOCTOR_WORKSPACE.md) for account emails, workflows, update instructions, and exact export/privacy rules. Older SRS/experiment reports describe their original baseline; this guide documents the extension.
+
 ## What works
 
 - Registration, password hashing, JWT cookies, logout, role authorization and account deactivation.

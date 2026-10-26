@@ -29,12 +29,13 @@ export function Header() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const loc = useLocation();
+  const clinician = user?.role === "doctor";
   useEffect(() => {
     setOpen(false);
     window.scrollTo(0, 0);
   }, [loc.pathname]);
   return (
-    <header className="site-header">
+    <header className={"site-header " + (clinician ? "clinical-header" : "")}>
       <div className="container nav">
         <Logo />
         <button
@@ -48,18 +49,37 @@ export function Header() {
           className={open ? "nav-links open" : "nav-links"}
           aria-label="Main navigation"
         >
-          <NavLink to="/">Home</NavLink>
-          <NavLink to="/doctors">Find doctors</NavLink>
-          <a href="/#how-it-works">How it works</a>
-          <NavLink to="/about">About us</NavLink>
+          {clinician ? (
+            <>
+              <NavLink to="/dashboard" end>
+                Practice overview
+              </NavLink>
+              <NavLink to="/dashboard/patients">My patients</NavLink>
+              <NavLink to="/dashboard/availability">My schedule</NavLink>
+              <span className="clinical-role">
+                <ShieldCheck size={14} /> Doctor portal
+              </span>
+            </>
+          ) : (
+            <>
+              <NavLink to="/">Home</NavLink>
+              <NavLink to="/doctors">Find doctors</NavLink>
+              <a href="/#how-it-works">How it works</a>
+              <NavLink to="/about">About us</NavLink>
+            </>
+          )}
           <span className="nav-divider" />
           {user ? (
             <Link to="/dashboard" className="button small dark">
-              My dashboard <ArrowUpRight size={16} />
+              {clinician ? "My workspace" : "My dashboard"}{" "}
+              <ArrowUpRight size={16} />
             </Link>
           ) : (
             <>
               <Link to="/login">Log in</Link>
+              <Link to="/login?role=doctor" className="doctor-entry">
+                Doctor sign in
+              </Link>
               <Link className="button small dark" to="/register">
                 Get started <ArrowUpRight size={16} />
               </Link>

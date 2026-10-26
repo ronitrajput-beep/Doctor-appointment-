@@ -742,11 +742,35 @@ export function AuthPage({ registerMode = false }: { registerMode?: boolean }) {
         <div className="eyebrow">
           {registerMode ? "LET’S BEGIN" : "GOOD TO SEE YOU"}
         </div>
-        <h2>{registerMode ? "Create your account" : "Welcome back."}</h2>
+        {!registerMode && (
+          <div className="login-roles">
+            <Link
+              className={params.get("role") !== "doctor" ? "active" : ""}
+              to="/login"
+            >
+              Patient / admin
+            </Link>
+            <Link
+              className={params.get("role") === "doctor" ? "active" : ""}
+              to="/login?role=doctor"
+            >
+              Doctor sign in
+            </Link>
+          </div>
+        )}
+        <h2>
+          {registerMode
+            ? "Create your account"
+            : params.get("role") === "doctor"
+              ? "Welcome, doctor."
+              : "Welcome back."}
+        </h2>
         <p>
           {registerMode
             ? "Take the first step towards more personal care."
-            : "Sign in to manage your care."}
+            : params.get("role") === "doctor"
+              ? "Use your assigned doctor account to manage your patients and schedule."
+              : "Sign in to manage your care."}
         </p>
         <form onSubmit={form.handleSubmit(submit)} noValidate>
           {registerMode && field("full_name", "Full name")}
